@@ -11,16 +11,18 @@ type Handlers struct {
 	idGen         *snowflake.Generator
 	postsRepo     *repository.PostsRepo
 	feedsRepo     *repository.FeedRepo
+	feedCache     *repository.FeedCache
 	followersRepo *repository.FollowersRepo
 }
 
 func NewHandler(
-	producer *kafka.Producer, idGen *snowflake.Generator, postsRepo *repository.PostsRepo, feedsRepo *repository.FeedRepo, followersRepo *repository.FollowersRepo) *Handlers {
+	producer *kafka.Producer, idGen *snowflake.Generator, postsRepo *repository.PostsRepo, feedsRepo *repository.FeedRepo, feedCache *repository.FeedCache, followersRepo *repository.FollowersRepo) *Handlers {
 	return &Handlers{
 		producer:      producer,
 		idGen:         idGen,
 		postsRepo:     postsRepo,
 		feedsRepo:     feedsRepo,
+		feedCache:     feedCache,
 		followersRepo: followersRepo,
 	}
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/its-me-ojas/event-driven-feed/config"
 	"github.com/its-me-ojas/event-driven-feed/internal/api"
 	"github.com/its-me-ojas/event-driven-feed/internal/api/handlers"
+	"github.com/its-me-ojas/event-driven-feed/internal/cache"
 	"github.com/its-me-ojas/event-driven-feed/internal/kafka"
 	"github.com/its-me-ojas/event-driven-feed/internal/repository"
 	"github.com/its-me-ojas/event-driven-feed/internal/snowflake"
@@ -28,10 +29,18 @@ func main() {
 	}
 	defer db.Close()
 
+	// Redis
+	redisClient, err := cache.NewRedisClient(cfg.RedisAddr, cfg.RedisPassword, cfg.RedisDB)
+	if err != nil {
+		log.Fatalf("Failed to connect to Redis: %v", err)
+	}
+	defer redisClient.Close()
+
 	// Repos
 	postsRepo := repository.NewPostsRepo(db)
 	feedsRepo := repository.NewFeedRepo(db)
 	followersRepo := repository.NewFollowersRepo(db)
+	feedCache := repository.NewFeedCache(redisClient)
 
 	// Kafka producer
 	producer := kafka.NewProducer(cfg.KafkaBrokers, cfg.PostEventTopic)
@@ -41,7 +50,7 @@ func main() {
 	idGen := snowflake.NewGenerator(1)
 
 	// Handlers
-	h := handlers.NewHandler(producer, idGen, postsRepo, feedsRepo, followersRepo)
+	h := handlers.NewHandler(producer, idGen, postsRepo, feedsRepo, feedCache, followersRepo)
 
 	// Router
 	router := api.NewRouter(h)
