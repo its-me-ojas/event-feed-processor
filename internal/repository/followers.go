@@ -36,7 +36,7 @@ func (r *FollowersRepo) Follow(ctx context.Context, followerID, followeeID strin
 }
 
 func (r *FollowersRepo) GetFollowerCount(ctx context.Context, userID string) (int, error) {
-	query := `SELECT COUNT(*) FROM followers WHERE follower_id = $1`
+	query := `SELECT COUNT(*) FROM followers WHERE followee_id = $1`
 	var count int
 	err := r.db.Pool.QueryRow(ctx, query, userID).Scan(&count)
 	if err != nil {

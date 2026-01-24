@@ -20,7 +20,7 @@ func NewPostsRepo(db *DB) *PostsRepo {
 	return &PostsRepo{db: db}
 }
 
-func (r *PostsRepo) create(ctx context.Context, post *Post) error {
+func (r *PostsRepo) Create(ctx context.Context, post *Post) error {
 	query := `
 	INSERT INTO posts (post_id,author_id,content,created_at) VALUES ($1,$2,$3,$4)`
 
@@ -31,7 +31,7 @@ func (r *PostsRepo) create(ctx context.Context, post *Post) error {
 func (r *PostsRepo) GetByID(ctx context.Context, postId int64) (*Post, error) {
 	query := `SELECT post_id, author_id, content, created_at FROM posts WHERE post_id=$1`
 	var post Post
-	err := r.db.Pool.QueryRow(ctx, query, postId).Scan(&postId, &post.AuthorID, &post.Content, &post.CreatedAt)
+	err := r.db.Pool.QueryRow(ctx, query, postId).Scan(&post.PostID, &post.AuthorID, &post.Content, &post.CreatedAt)
 	if err != nil {
 		return nil, err
 	}

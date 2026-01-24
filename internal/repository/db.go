@@ -12,7 +12,7 @@ type DB struct {
 	Pool *pgxpool.Pool
 }
 
-func newDB(ctx context.Context, databaseURL string) (*DB, error) {
+func NewDB(ctx context.Context, databaseURL string) (*DB, error) {
 	config, err := pgxpool.ParseConfig(databaseURL)
 	if err != nil {
 		return nil, fmt.Errorf("parse config: %v", err)
