@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -11,6 +12,7 @@ import (
 	"github.com/its-me-ojas/event-driven-feed/internal/kafka"
 	"github.com/its-me-ojas/event-driven-feed/internal/processor"
 	"github.com/its-me-ojas/event-driven-feed/internal/repository"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -42,6 +44,17 @@ func main() {
 	}
 	consumer := kafka.NewConsumer(consumerCfg)
 	defer consumer.Close()
+
+	// Start a separate HTTP server for metrics
+	// This runs in a goroutine so it doesn't block the main thread
+	go func() {
+		log.Printf("Starting metrics server on port %s", cfg.ProcessorPort)
+		http.Handle("/metrics", promhttp.Handler())
+		// We use ProcessorPort (e.g., 8081) to avoid conflict with API (8080)
+		if err := http.ListenAndServe(":"+cfg.ProcessorPort, nil); err != nil {
+			log.Printf("Metrics server failed: %v", err)
+		}
+	}()
 
 	// 6. Handle Graceful Shutdown
 	ctx, cancel := context.WithCancel(context.Background())

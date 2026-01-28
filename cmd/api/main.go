@@ -12,10 +12,12 @@ import (
 	"github.com/its-me-ojas/event-driven-feed/config"
 	"github.com/its-me-ojas/event-driven-feed/internal/api"
 	"github.com/its-me-ojas/event-driven-feed/internal/api/handlers"
+	"github.com/its-me-ojas/event-driven-feed/internal/api/middleware"
 	"github.com/its-me-ojas/event-driven-feed/internal/cache"
 	"github.com/its-me-ojas/event-driven-feed/internal/kafka"
 	"github.com/its-me-ojas/event-driven-feed/internal/repository"
 	"github.com/its-me-ojas/event-driven-feed/internal/snowflake"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -54,6 +56,9 @@ func main() {
 
 	// Router
 	router := api.NewRouter(h)
+
+	router.Use(middleware.MetricsMiddleware)
+	router.Handle("/metrics", promhttp.Handler())
 
 	// Server
 	srv := &http.Server{
