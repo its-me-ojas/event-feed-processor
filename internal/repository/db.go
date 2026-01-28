@@ -18,7 +18,7 @@ func NewDB(ctx context.Context, databaseURL string) (*DB, error) {
 		return nil, fmt.Errorf("parse config: %v", err)
 	}
 
-	config.MaxConns = 25
+	config.MaxConns = 100
 	config.MinConns = 5
 	config.MaxConnLifetime = time.Hour
 	config.MaxConnIdleTime = 30 * time.Minute
