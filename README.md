@@ -59,10 +59,8 @@ graph TD
     Proc -->|Fan-Out Batch Insert| DB
     Proc -->|Update/Invalidate| Redis
     
-    subgraph Observability
-        Prometheus -->|Scrape| API
-        Prometheus -->|Scrape| Proc
-    end
+    Prometheus -->|Scrape| API
+    Prometheus -->|Scrape| Proc
 ```
 
 ## 📝 API Endpoints
