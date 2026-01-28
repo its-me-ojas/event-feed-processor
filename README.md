@@ -63,6 +63,17 @@ graph TD
     Prometheus -->|Scrape| Proc
 ```
 
+## ⚡ Performance Benchmarks
+
+Tested on a single development machine (MacBook Air M4) with all services running locally via Docker.
+
+| Metric | Throughput | Latency (Avg) | Notes |
+|--------|------------|---------------|-------|
+| **Write (Create Post)** | **~1,200 RPS** | ~80ms | Async processing via Kafka |
+| **Read (Get Feed)** | **~3,800 RPS** | ~5ms | **Redis Cache-Aside** Hit |
+
+> System demonstrates high read scalability due to caching and decoupled write/fan-out architecture.
+
 ## 📝 API Endpoints
 
 | Method | Endpoint | Description |
