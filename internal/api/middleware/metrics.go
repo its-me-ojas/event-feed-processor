@@ -37,7 +37,7 @@ func MetricsMiddleware(next http.Handler) http.Handler {
 			pathTemplate = "unknown"
 		}
 		status := strconv.Itoa(rw.statusCode)
-		metrics.HttpRequestDuration.WithLabelValues(r.Method, pathTemplate, status).Observe(duration)
+		metrics.HttpRequestsTotal.WithLabelValues(r.Method, pathTemplate, status).Inc()
 		metrics.HttpRequestDuration.WithLabelValues(r.Method, pathTemplate).Observe(duration)
 	})
 }

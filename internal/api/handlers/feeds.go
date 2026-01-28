@@ -31,9 +31,9 @@ func (h *Handlers) GetFeed(w http.ResponseWriter, r *http.Request) {
 
 	// 1. try cache first (only for page1)
 	// we usually cache the first page (offset 0) as its the most viewed
-	if offset == 1 {
+	if offset == 0 {
 		cachedFeed, err := h.feedCache.GetFeed(r.Context(), userID)
-		if err == nil {
+		if err == nil && cachedFeed != nil {
 			// Cache hit
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(FeedResponse{

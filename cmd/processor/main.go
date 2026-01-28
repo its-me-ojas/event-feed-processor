@@ -30,9 +30,10 @@ func main() {
 	idempotencyRepo := repository.NewIdempotencyRepo(db)
 	feedRepo := repository.NewFeedRepo(db)
 	followersRepo := repository.NewFollowersRepo(db)
+	postsRepo := repository.NewPostsRepo(db)
 
 	// 4. Initialize Handler (The Business Logic)
-	handler := processor.NewEventHandler(idempotencyRepo, feedRepo, followersRepo)
+	handler := processor.NewEventHandler(idempotencyRepo, feedRepo, followersRepo, postsRepo)
 
 	// 5. Initialize Kafka Consumer (The Transport Layer)
 	consumerCfg := kafka.ConsumerConfig{

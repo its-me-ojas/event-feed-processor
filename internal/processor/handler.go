@@ -16,13 +16,15 @@ type EventHandler struct {
 	idempotencyRepo *repository.IdempotencyRepo
 	feedRepo        *repository.FeedRepo
 	followersRepo   *repository.FollowersRepo
+	postsRepo       *repository.PostsRepo
 }
 
-func NewEventHandler(idem *repository.IdempotencyRepo, feed *repository.FeedRepo, followers *repository.FollowersRepo) *EventHandler {
+func NewEventHandler(idem *repository.IdempotencyRepo, feed *repository.FeedRepo, followers *repository.FollowersRepo, posts *repository.PostsRepo) *EventHandler {
 	return &EventHandler{
 		idempotencyRepo: idem,
 		feedRepo:        feed,
 		followersRepo:   followers,
+		postsRepo:       posts,
 	}
 }
 
@@ -90,6 +92,28 @@ func (h *EventHandler) Handle(msg kafka.Message) error {
 func (h *EventHandler) handlePostCreated(ctx context.Context, event *events.Event) error {
 	authorID := event.ActorID
 	postID := event.Payload.PostID
+	content := event.Payload.Content
+
+	post := &repository.Post{
+		PostID:    postID,
+		AuthorID:  authorID,
+		Content:   content,
+		CreatedAt: time.Unix(event.Timestamp, 0),
+	}
+	if err := h.postsRepo.Create(ctx, post); err != nil {
+		return fmt.Errorf("Failed to persist post: %v", err)
+	}
+
+	// for follower count
+	count, err := h.followersRepo.GetFollowerCount(ctx, authorID)
+	if err != nil {
+		return fmt.Errorf("failed to get follower count: %v", err)
+	}
+
+	if count >= 10000 {
+		log.Printf("User %s is a celebrity (%d followers skipping fan out)", authorID, count)
+		return nil
+	}
 
 	// 1. Fetch all followers of the author
 	followers, err := h.followersRepo.GetFollowers(ctx, authorID)

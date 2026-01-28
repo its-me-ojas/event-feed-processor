@@ -1,6 +1,8 @@
 package repository
 
-import "context"
+import (
+	"context"
+)
 
 type FollowersRepo struct {
 	db *DB
@@ -43,4 +45,25 @@ func (r *FollowersRepo) GetFollowerCount(ctx context.Context, userID string) (in
 		return 0, err
 	}
 	return count, nil
+}
+
+func (r *FollowersRepo) GetCelebrityFollowees(ctx context.Context, userID string) ([]string, error) {
+	query := `SELECT f.followee_id FROM followers f JOIN ( SELECT followee_id, COUNT(*) as cnt FROM followers GROUP BY followee_id) counts ON f.followee_id = counts.followee_id WHERE f.follower_id = $1 AND counts.cnt >=100`
+	rows, err := r.db.Pool.Query(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var ids []string
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return ids, nil
+
 }
